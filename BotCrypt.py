@@ -20,6 +20,8 @@ import os.path
 import sys
 from progress.bar import IncrementalBar
 from pyfiglet import Figlet
+import getpass
+
 
 
 f = Figlet(font='slant')
@@ -90,8 +92,8 @@ def main():
     user_comand = input('chooise action: ')
     if user_comand == '1':
         dir = input('file: ')
-        password1 = input('password: ')
-        password2 = input('repeat password: ')
+        password1 = getpass.getpass('password: ')
+        password2 = getpass.getpass('repeat password: ')
         if str(password1) == str(password2):
             password = password2
         else:
@@ -101,13 +103,13 @@ def main():
         main()
     elif user_comand == '2':
         dir = input('file ')
-        password = input('password: ')
+        password = getpass.getpass('password: ')
         decrypt(dir, password)
         main()
     elif user_comand == '3':
         dir = input('dir: ')
-        password1 = input('password: ')
-        password2 = input('repeat password: ')
+        password1 = getpass.getpass('password: ')
+        password2 = getpass.getpass('repeat password: ')
         if str(password1) == str(password2):
             password = password2
         else:
@@ -120,7 +122,7 @@ def main():
         main()
     elif user_comand == '4':
         dir = input('dir: ')
-        password = input('password: ')
+        password = getpass.getpass('password: ')
         cpt = sum([len(files) for r, d, files in os.walk(dir)])
         bar = IncrementalBar('Processing', max=cpt)
         walk_d(dir, password)
