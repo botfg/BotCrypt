@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #==============================================================================
-
 import pyAesCrypt
 import os
 import os.path
@@ -21,6 +20,7 @@ import sys
 from progress.bar import IncrementalBar
 from pyfiglet import Figlet
 import getpass
+from hashlib import sha512
 
 
 
@@ -30,20 +30,34 @@ print(f.renderText('Bot crypt'))
 
 
 
+def hash(string):
+    signature = sha512(string.encode()).hexdigest()
+    return signature
 
 
-def crypt(dir, password):
+
+def crypt(dir, password, password2):
     x = os.path.isfile(dir)
     if x == False:
         print('No such file or directory')
         main()
+    lol = hash(dir)
+    print(lol)
     buffer_size = 512 * 2048
     try:
-        pyAesCrypt.encryptFile(str(dir), str(dir) + '.aes', password, buffer_size)
+        pyAesCrypt.encryptFile(str(dir), str(dir + '.bin'), password, buffer_size)
     except :
-        print('Eror')
+        print('Error')
+        main()
+    dir2 = dir + '.bin'
+    try:
+        pyAesCrypt.encryptFile(str(dir2), str(dir + '.aes'), password2, buffer_size)
+    except :
+        print('Error')
         main()
     os.remove(dir)
+    os.remove(dir2)
+
 
 
 def walk_e(dir, password):
@@ -70,18 +84,27 @@ def walk_d(dir, password):
 
 
 
-def decrypt(dir, password):
+def decrypt(dir, password, password2):
     x = os.path.isfile(dir)
     if x is False:
         print('No such file or directory')
         main()
     buffer_size = 512 * 2048
+    dir2 = dir[0:-4] + '.bin'
     try:
-        pyAesCrypt.decryptFile(str(dir), str(dir[0:-4]), password, buffer_size)
+        pyAesCrypt.decryptFile(str(dir), str(dir2), password2, buffer_size)
     except:
-        print('Eror')
+        print('Error')
         main()
+    try:
+        pyAesCrypt.decryptFile(str(dir2), str(dir2[0:-4]), password, buffer_size)
+    except:
+        print('Error')
+        main()
+    lol = hash(dir2[0:-4])
+    print(lol)
     os.remove(dir)
+    os.remove(dir2)
 
 
 def main():
@@ -92,24 +115,32 @@ def main():
     user_comand = input('chooise action: ')
     if user_comand == '1':
         dir = input('file: ')
-        password1 = getpass.getpass('password: ')
-        password2 = getpass.getpass('repeat password: ')
-        if str(password1) == str(password2):
-            password = password2
+        password_1 = getpass.getpass('введи пароль 1: ')
+        password_2 = getpass.getpass('повтори пвроль 1: ')
+        if str(password_1) == str(password_2):
+            password = password_2
         else:
             print('different password')
             main()
-        crypt(dir, password)
+        password_3 = getpass.getpass('введи пароль 2: ')
+        password_4 = getpass.getpass('повтори пвроль 2: ')
+        if str(password_3) == str(password_4):
+            password2 = password_4
+        else:
+            print('different password')
+            main()
+        crypt(dir, password, password2)
         main()
     elif user_comand == '2':
-        dir = input('file ')
-        password = getpass.getpass('password: ')
-        decrypt(dir, password)
+        dir = input('file: ')
+        password = getpass.getpass('введи пароль 1: ')
+        password2 = getpass.getpass('введи пароль 2: ')
+        decrypt(dir, password, password2)
         main()
     elif user_comand == '3':
         dir = input('dir: ')
-        password1 = getpass.getpass('password: ')
-        password2 = getpass.getpass('repeat password: ')
+        password1 = getpass.getpass('введи пароль: ')
+        password2 = getpass.getpass('повтори пвроль: ')
         if str(password1) == str(password2):
             password = password2
         else:
@@ -122,7 +153,7 @@ def main():
         main()
     elif user_comand == '4':
         dir = input('dir: ')
-        password = getpass.getpass('password: ')
+        password = hash(getpass.getpass('введи пароль: '))
         cpt = sum([len(files) for r, d, files in os.walk(dir)])
         bar = IncrementalBar('Processing', max=cpt)
         walk_d(dir, password)
