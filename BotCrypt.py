@@ -23,6 +23,7 @@ import getpass
 from hashlib import sha3_512
 
 
+
 f = Figlet(font='slant')
 print(f.renderText('Bot crypt'))
 
@@ -73,7 +74,7 @@ def walk_d(dir, password, password2):
         else: walk_d(path, password, password2)
 
 
-def decrypt(dir, password, password2):
+def decrypt(dir, password):
     x = os.path.isfile(dir)
     if x is False:
         print('No such file or directory')
@@ -85,12 +86,6 @@ def decrypt(dir, password, password2):
     except:
         print('Error')
         main()
-    try:
-        pyAesCrypt.decryptFile(str(dir2), str(dir2[0:-4]), password, buffer_size)
-    except:
-        print('Error')
-        main()
-    os.remove(dir)
     os.remove(dir2)
 
 
