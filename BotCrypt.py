@@ -20,16 +20,19 @@ import sys
 from progress.bar import IncrementalBar
 from pyfiglet import Figlet
 import getpass
-import hashlib
 from hashlib import sha3_512
-import sqlite3
+
+
 
 f = Figlet(font='slant')
 print(f.renderText('Bot crypt'))
 
-BLOCKSIZE = 65536
 
-def crypt_bd(dir, password, password2):
+def hash(string):
+    signature = sha3_512(string.encode()).hexdigest()
+
+
+def crypt(dir, password, password2):
     x = os.path.isfile(dir)
     if x == False:
         print('No such file or directory')
@@ -50,198 +53,14 @@ def crypt_bd(dir, password, password2):
     os.remove(dir2)
 
 
-
-
-def decrypt_bd(dir, password, password2):
-    x = os.path.isfile(dir)
-    if x is False:
-        print('No such file or directory')
-        main()
-    buffer_size = 512 * 2048
-    dir2 = dir[0:-4] + '.bin'
-    try:
-        pyAesCrypt.decryptFile(str(dir), str(dir2), password2, buffer_size)
-    except:
-        print('Error')
-        main()
-    try:
-        pyAesCrypt.decryptFile(str(dir2), str(dir2[0:-4]), password, buffer_size)
-    except:
-        print('Error')
-        main()
-    os.remove(dir)
-    os.remove(dir2)
-
-
-x1 = os.path.isfile('.database.db')
-x2 = os.path.isfile('.database.db.aes')
-if x1 == False and x2 == True:
-    password = getpass.getpass('pass 1: ')
-    password2 = getpass.getpass('pass 2: ')
-    decrypt_bd('.database.db.aes', password, password2)
-    name_db = '.database.db'
-    cur_dir = os.getcwd()
-    path_db = os.path.join(cur_dir, name_db)
-    conn = sqlite3.connect(path_db)
-    conn.row_factory = lambda cursor, row: row[0]
-    cursor = conn.cursor()
-else:
-    name_db = '.database.db'
-    cur_dir = os.getcwd()
-    path_db = os.path.join(cur_dir, name_db)
-    conn = sqlite3.connect(path_db)
-    conn.row_factory = lambda cursor, row: row[0]
-    cursor = conn.cursor()
-
-def md5(filename, blocksize=65536):
-    hash = hashlib.md5()
-    with open(filename, "rb") as f:
-        for block in iter(lambda: f.read(blocksize), b""):
-            hash.update(block)
-    return hash.hexdigest()
-
-def sha1OfFile(filepath):
-    sha = hashlib.sha3_512()
-    with open(filepath, 'rb') as f:
-        while True:
-            block = f.read(2**10)
-            if not block: break
-            sha.update(block)
-        return sha.hexdigest()
-
-
-def hash_s(string):
-    signature = sha3_512(string.encode()).hexdigest()
-    return signature
-
-
-
-
-def decrypt(dir, password, password2):
-    x = os.path.isfile(dir)
-    if x is False:
-        print('No such file or directory')
-        main()
-    print(proverka_aes(dir))
-    buffer_size = 512 * 2048
-    dir2 = dir[0:-4] + '.bin'
-    try:
-        pyAesCrypt.decryptFile(str(dir), str(dir2), password2, buffer_size)
-    except:
-        print('Error')
-        main()
-    dir3 = dir[0:-4]
-    try:
-        pyAesCrypt.decryptFile(str(dir2), str(dir3), password, buffer_size)
-    except:
-        print('Error')
-        main()
-    os.remove(dir)
-    os.remove(dir2)
-
-
-
-def decrypt_dir(dir, password, password2):
-    x = os.path.isfile(dir)
-    if x is False:
-        print('No such file or directory')
-        main()
-    if proverka_aes(dir) == 'файл изменён ':
-        print('file: ' + dir + ' изменён ')
-        uc = input('извлечь? ')
-        if uc == '-':
-            main()
-    buffer_size = 512 * 2048
-    dir2 = dir[0:-4] + '.bin'
-    try:
-        pyAesCrypt.decryptFile(str(dir), str(dir2), password2, buffer_size)
-    except:
-        print('Error')
-        main()
-    dir3 = dir[0:-4]
-    try:
-        pyAesCrypt.decryptFile(str(dir2), str(dir3), password, buffer_size)
-    except:
-        print('Error')
-        main()
-    os.remove(dir)
-    os.remove(dir2)
-
-
-def add_aes_h(filename):
-    try:
-        x0 = hash_s(filename)
-        x1 = md5(filename)
-        x2 = sha1OfFile(filename)
-        hash = [(x0,x1,x2)]
-        cursor.executemany("INSERT INTO hash_aes VALUES (?,?,?)", hash)
-        conn.commit()
-    except:
-        print('ошибка')
-
-
-def proverka_aes(filename):
-    cursor.execute('SELECT name FROM hash_aes')
-    results = cursor.fetchall()
-    x = list(results)
-    if hash_s(filename) in x:
-        p1 = md5(filename)
-        p2 = sha1OfFile(filename)
-        cursor.execute('SELECT md5 FROM hash_aes')
-        results1 = cursor.fetchall()
-        x1 = list(results1)
-        if p1 in x1:
-            cursor.execute('SELECT sha FROM hash_aes')
-            results2 = cursor.fetchall()
-            x2 = list(results2)  
-            if p2 in x2:
-                return 'файл не изменён '
-            else:
-                return 'файл изменён '
-        else:
-            return 'файл изменён '
-    else:
-        return 'файла нет в базе'
-
-
-
-
-def crypt(dir, password, password2):
-    x = os.path.isfile(dir)
-    if x == False:
-        print('No such file or directory')
-        main()
-    buffer_size = 512 * 2048
-    dir2 = dir + '.bin'
-    try:
-        pyAesCrypt.encryptFile(str(dir), str(dir2), password, buffer_size)
-    except :
-        print('Error')
-        main()
-        os.remove(dir)
-    dir3 = dir + '.aes'
-    try:
-        pyAesCrypt.encryptFile(str(dir2), str(dir3), password2, buffer_size)
-    except  :
-        print('Error')
-        main()
-    add_aes_h(dir3) 
-    os.remove(dir)
-    os.remove(dir2)
-
-
 def walk_e(dir, password, password2):
-    try:
-        for name in os.listdir(dir):
-            path = os.path.join(dir,name)
-            if os.path.isfile(path):
-                crypt(path, password, password2)
-                bar.next()
-            else: 
-                walk_e(path, password, password2)
-    except FileNotFoundError:
-        print('not dir')
-        main()
+    for name in os.listdir(dir):
+        path = os.path.join(dir,name)
+        if os.path.isfile(path):
+            crypt(path, password, password2)
+            bar.next()
+        else: 
+            walk_e(path, password, password2)
 
 
 def walk_d(dir, password, password2):
@@ -249,11 +68,25 @@ def walk_d(dir, password, password2):
         path = os.path.join(dir, name)
         if os.path.isfile(path):  
             try: 
-                decrypt_dir(path, password, password2)
+                decrypt(path, password, password2)
                 bar.next()
             except: pass
         else: walk_d(path, password, password2)
 
+
+def decrypt(dir, password):
+    x = os.path.isfile(dir)
+    if x is False:
+        print('No such file or directory')
+        main()
+    buffer_size = 512 * 2048
+    dir2 = dir[0:-4] + '.bin'
+    try:
+        pyAesCrypt.decryptFile(str(dir), str(dir2), password2, buffer_size)
+    except:
+        print('Error')
+        main()
+    os.remove(dir2)
 
 
 def main():
@@ -317,28 +150,12 @@ def main():
         bar.finish()
         main()
     elif user_comand == '5':
-        pass1 = getpass.getpass('pass 1: ')
-        pass2 = getpass.getpass('pass 2: ')
-        crypt_bd(path_db,pass1,pass2)
+        print('')
         sys.exit()
     else:
         print('not valibale action')
         main()
 
 
-
-
-try:
-    # Создание таблицы
-    cursor.execute("""CREATE TABLE hash_aes
-                (name text, md5 text, sha text)
-                    """)
-    # Сохраняем изменения
-    conn.commit()
-except:
+if(__name__ == '__main__'):
     main()
-
-main()
-
-
-
