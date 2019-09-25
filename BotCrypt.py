@@ -74,7 +74,7 @@ def walk_d(dir, password, password2):
         else: walk_d(path, password, password2)
 
 
-def decrypt(dir, password):
+def decrypt(dir, password, password2):
     x = os.path.isfile(dir)
     if x is False:
         print('No such file or directory')
@@ -86,6 +86,12 @@ def decrypt(dir, password):
     except:
         print('Error')
         main()
+    try:
+        pyAesCrypt.decryptFile(str(dir2), str(dir[0:-4]), password, buffer_size)
+    except:
+        print('Error')
+        main()
+    os.remove(dir)
     os.remove(dir2)
 
 
