@@ -37,20 +37,31 @@ def crypt(dir, password, password2):
     if x == False:
         print('No such file or directory')
         main()
-    buffer_size = 512 * 2048
-    try:
-        pyAesCrypt.encryptFile(str(dir), str(dir + '.bin'), password, buffer_size)
-    except :
-        print('Error')
-        main()
+    buffer_size1 = 512 * 2048
+    pyAesCrypt.encryptFile(str(dir), str(dir + '.bin'), password, buffer_size1)
     dir2 = dir + '.bin'
-    try:
-        pyAesCrypt.encryptFile(str(dir2), str(dir + '.aes'), password2, buffer_size)
-    except :
-        print('Error')
-        main()
+    buffer_size2 = 512 * 2048
+    pyAesCrypt.encryptFile(str(dir2), str(dir + '.aes'), password2, buffer_size2)
     os.remove(dir)
     os.remove(dir2)
+
+
+def crypt_add_file(dir,password, file):
+    x = os.path.isfile(dir)
+    if x == False:
+        print('No such file or directory')
+        main()
+    buffer_size1 = 512 * 2048
+    pyAesCrypt.encryptFile(str(dir), str(dir + '.bin'), password, buffer_size1)
+    dir2 = dir + '.bin'
+    buffer_size2 = 512 * 2048
+    with open(file, "rb") as in_file:
+        in_file.seek(0)
+        file_b = str(in_file.read(350))
+    pyAesCrypt.encryptFile(str(dir2), str(dir + '.aes'), file_b, buffer_size2)
+    os.remove(dir)
+    os.remove(dir2)
+
 
 
 def walk_e(dir, password, password2):
@@ -79,18 +90,28 @@ def decrypt(dir, password, password2):
     if x is False:
         print('No such file or directory')
         main()
-    buffer_size = 512 * 2048
+    buffer_size1 = 512 * 2048
     dir2 = dir[0:-4] + '.bin'
-    try:
-        pyAesCrypt.decryptFile(str(dir), str(dir2), password2, buffer_size)
-    except:
-        print('Error')
+    pyAesCrypt.decryptFile(str(dir), str(dir2), password2, buffer_size1)
+    buffer_size2 = 512 * 2048
+    pyAesCrypt.decryptFile(str(dir2), str(dir[0:-4]), password, buffer_size2)
+    os.remove(dir)
+    os.remove(dir2)
+
+
+def decrypt_add_file(dir, password, file):
+    x = os.path.isfile(dir)
+    if x is False:
+        print('No such file or directory')
         main()
-    try:
-        pyAesCrypt.decryptFile(str(dir2), str(dir[0:-4]), password, buffer_size)
-    except:
-        print('Error')
-        main()
+    buffer_size1 = 512 * 2048
+    dir2 = dir[0:-4] + '.bin'
+    with open(file, "rb") as in_file:
+        in_file.seek(0)
+        file_b = str(in_file.read(350))
+    pyAesCrypt.decryptFile(str(dir), str(dir2), file_b, buffer_size1)
+    buffer_size2 = 512 * 2048
+    pyAesCrypt.decryptFile(str(dir2), str(dir[0:-4]), password, buffer_size2)
     os.remove(dir)
     os.remove(dir2)
 
@@ -102,29 +123,57 @@ def main():
     print('------------------------------------------------------------------------')
     user_comand = input('chooise action: ')
     if user_comand == '1':
-        dir = input('file: ')
-        password_1 = hash(getpass.getpass('введи пароль 1: '))
-        password_2 = hash(getpass.getpass('повтори пвроль 1: '))
-        if str(password_1) == str(password_2):
-            password = str(password_2)
-        else:
-            print('different password')
+        uc = input('use file as key? +y -n: ')
+        if uc == '-':
+            dir = input('encrypted file: ')
+            password_1 = hash(getpass.getpass('введи пароль 1: '))
+            password_2 = hash(getpass.getpass('повтори пвроль 1: '))
+            if str(password_1) == str(password_2):
+                password = str(password_2)
+            else:
+                print('different password')
+                main()
+            password_3 = getpass.getpass('введи пароль 2(strong): ')
+            password_4 = getpass.getpass('повтори пвроль 2: ')
+            if str(password_3) == str(password_4):
+                password2 = password_4
+            else:
+                print('different password')
+                main()
+            crypt(dir, password, password2)
+            main
+        elif  uc == '+':
+            dir = input('encrypted file: ')
+            password_1 = hash(getpass.getpass('введи пароль 1: '))
+            password_2 = hash(getpass.getpass('повтори пвроль 1: '))
+            if str(password_1) == str(password_2):
+                password = str(password_2)
+            else:
+                print('different password')
+                main()
+            file = input('file key: ')
+            crypt_add_file(dir,password, file)
             main()
-        password_3 = getpass.getpass('введи пароль 2(strong): ')
-        password_4 = getpass.getpass('повтори пвроль 2: ')
-        if str(password_3) == str(password_4):
-            password2 = password_4
         else:
-            print('different password')
+            print('wrong command')
             main()
-        crypt(dir, password, password2)
-        main()
     elif user_comand == '2':
-        dir = input('file: ')
-        password = str(hash(getpass.getpass('введи пароль 1: ')))
-        password2 = getpass.getpass('введи пароль 2: ')
-        decrypt(dir, password, password2)
-        main()
+        uc = input("use file as key? +y -n: ")
+        if uc == '-':
+            dir = input('encrypted file: ')
+            password = str(hash(getpass.getpass('введи пароль 1: ')))
+            password2 = getpass.getpass('введи пароль 2: ')
+            decrypt(dir, password, password2)
+            main()
+        elif uc == '+':
+            dir = input('encrypted file: ')
+            password = str(hash(getpass.getpass('введи пароль 1: ')))
+            file = input('file key: ')
+            decrypt_add_file(dir,password,file)
+            main()
+        else:
+            print('wrong command')
+            main()
     elif user_comand == '3':
         dir = input('dir: ')
         password_1 = getpass.getpass('введи пароль 1: ')
@@ -165,3 +214,4 @@ def main():
 
 if(__name__ == '__main__'):
     main()
+    
