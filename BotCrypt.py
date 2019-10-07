@@ -21,6 +21,7 @@ from progress.bar import IncrementalBar
 from pyfiglet import Figlet
 import getpass
 from hashlib import sha3_512
+import hashlib
 
 
 
@@ -31,6 +32,14 @@ print(f.renderText('Bot crypt'))
 def hash(string):
     signature = sha3_512(string.encode()).hexdigest()
 
+def sha1OfFile(filepath):
+    sha = hashlib.sha3_512()
+    with open(filepath, 'rb') as f:
+        while True:
+            block = f.read(2**10)
+            if not block: break
+            sha.update(block)
+        return sha.hexdigest()
 
 def crypt(dir, password, password2):
     x = os.path.isfile(dir)
@@ -57,7 +66,7 @@ def crypt_add_file(dir,password, file):
     buffer_size2 = 512 * 2048
     with open(file, "rb") as in_file:
         in_file.seek(0)
-        file_b = str(in_file.read(350))
+        file_b = str(in_file.read(315)) + str(sha1OfFile(file))
     pyAesCrypt.encryptFile(str(dir2), str(dir + '.aes'), file_b, buffer_size2)
     os.remove(dir)
     os.remove(dir2)
@@ -104,15 +113,14 @@ def decrypt_add_file(dir, password, file):
     if x is False:
         print('No such file or directory')
         main()
-    buffer_size1 = 512 * 2048
+    buffer_size = 512 * 2048
     dir2 = dir[0:-4] + '.bin'
     with open(file, "rb") as in_file:
         in_file.seek(0)
-        file_b = str(in_file.read(350))
-    pyAesCrypt.decryptFile(str(dir), str(dir2), file_b, buffer_size1)
-    buffer_size2 = 512 * 2048
-    pyAesCrypt.decryptFile(str(dir2), str(dir[0:-4]), password, buffer_size2)
+        file_b = str(in_file.read(315)) + str(sha1OfFile(file))
+    pyAesCrypt.decryptFile(str(dir), str(dir2), file_b, buffer_size)
     os.remove(dir)
+    pyAesCrypt.decryptFile(str(dir2), str(dir[0:-4]), password, buffer_size)
     os.remove(dir2)
 
 
@@ -210,6 +218,7 @@ def main():
     else:
         print('not valibale action')
         main()
+
 
 
 if(__name__ == '__main__'):
