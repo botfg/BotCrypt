@@ -66,7 +66,10 @@ def crypt_add_file(file, password, fileKey):
     buffer_size2 = 512 * 2048
     with open(fileKey, "rb") as in_file:
         in_file.seek(0)
-        file_b = str(in_file.read(315)) + str(sha1OfFile(fileKey))
+        if len(in_file.read()) > 315:
+            file_b = str(in_file.read(315)) + str(sha1OfFile(fileKey))
+        elif len(in_file.read()) < 315:
+            file_b = str(in_file.read()) + str(sha1OfFile(fileKey))
     pyAesCrypt.encryptFile(file2, str(file + '.aes'), file_b, buffer_size2)
     os.remove(file)
     os.remove(file2)
@@ -137,7 +140,10 @@ def decrypt_add_file(file, password, fileKey):
     file2 = file[0:-4] + '.bin'
     with open(fileKey, "rb") as in_file:
         in_file.seek(0)
-        file_b = str(in_file.read(315)) + str(sha1OfFile(fileKey))
+        if len(in_file.read()) > 315:
+            file_b = str(in_file.read(315)) + str(sha1OfFile(fileKey))
+        elif len(in_file.read()) < 315:
+            file_b = str(in_file.read()) + str(sha1OfFile(fileKey))
     pyAesCrypt.decryptFile(file, file2, file_b, buffer_size)
     os.remove(file)
     pyAesCrypt.decryptFile(file2, str(file[0:-4]), password, buffer_size)
@@ -151,54 +157,78 @@ def main():
     print('------------------------------------------------------------------------')
     user_comand = input('chooise action: ')
     if user_comand == '1':
-        uc = input('use file as key? +y -n: ')
-        if uc == '-':
-            uc = input('1 pass or 2 pass: ')
-            if uc == '1':
-                dir = input('encrypted file: ')
-                # проверка введёного файла на сушествование
+        print('Encrypt file')
+        while True:
+            uc = input('use file as key? +y -n: ')
+            if uc == 'q':
+                break
+            elif uc == '-':
                 while True:
-                    x1 = os.path.isfile(dir)
-                    if not x1:
-                        print('нет файла')
-                        dir = input('encrypted file: ')
-                    if x1:
-                        break
-                password_1 = getpass.getpass('введи пароль 1: ')
-                password_2 = getpass.getpass('повтори пвроль 1: ')
-                if str(password_1) == str(password_2):
-                    password = str(password_2)
-                else:
-                    print('different password')
-                    main()
-                crypt_1pass(dir, password)
-                main()
-            elif uc == '2':
-                dir = input('encrypted file: ')
-                # проверка введёного файла на сушествование
-                while True:
-                    x1 = os.path.isfile(dir)
-                    if not x1:
-                        print('нет файла')
-                        dir = input('encrypted file: ')
-                    if x1:
-                        break
-                password_1 = getpass.getpass('введи пароль 1: ')
-                password_2 = getpass.getpass('повтори пвроль 1: ')
-                if str(password_1) == str(password_2):
-                    password = str(password_2)
-                else:
-                    print('different password')
-                    main()
-                password_3 = getpass.getpass('введи пароль 2: ')
-                password_4 = getpass.getpass('повтори пвроль 2: ')
-                if str(password_3) == str(password_4):
-                    password2 = str(password_3)
-                else:
-                    print('different password')
-                    main()
-                crypt_2pass(dir, password, password2)
-                main()
+                    uc = input('1 pass or 2 pass: ')
+                    if uc == '1':
+                        # проверка введёного файла на сушествование
+                        while True:
+                            dir = input('encrypted file: ')
+                            if dir == 'q':
+                                main()
+                            x1 = os.path.isfile(dir)
+                            if not x1:
+                                print('нет файла')
+                            if x1:
+                                break
+                        while True:
+                            password_1 = getpass.getpass('введи пароль 1: ')
+                            if password_1 == 'q':
+                                main()
+                            password_2 = getpass.getpass('повтори пвроль 1: ')
+                            if password_2 == 'q':
+                                main()
+                            if str(password_1) == str(password_2):
+                                password = str(password_2)
+                                break
+                            else:
+                                print('different password')
+                        crypt_1pass(dir, password)
+                        main()
+                    elif uc == '2':
+                        # проверка введёного файла на сушествование
+                        while True:
+                            dir = input('encrypted file: ')
+                            if dir == 'q':
+                                main()
+                            x1 = os.path.isfile(dir)
+                            if not x1:
+                                print('нет файла')
+                            if x1:
+                                break
+                        while True: # проверка 1 пароля
+                            password_1 = getpass.getpass('введи пароль 1: ')
+                            if password_1 == 'q':
+                                main()
+                            password_2 = getpass.getpass('повтори пвроль 1: ')
+                            if password_2 == 'q':
+                                main()
+                            if str(password_1) == str(password_2):
+                                password = str(password_2)
+                                break
+                            else:
+                                print('different password')
+                        while True: # проверка второго пароля
+                            password_3 = getpass.getpass('введи пароль 2: ')
+                            if password_3 == 'q':
+                                main()
+                            password_4 = getpass.getpass('повтори пвроль 2: ')
+                            if password_4 == 'q':
+                                main()
+                            if str(password_3) == str(password_4):
+                                password2 = str(password_3)
+                                break
+                            else:
+                                print('different password')
+                        crypt_2pass(dir, password, password2)
+                        main()
+                    else:
+                        print('wrong command')
             elif uc == '+':
                 dir = input('encrypted file: ')
                 # проверка введёного файла на сушествование
@@ -227,190 +257,247 @@ def main():
                         break
                 crypt_add_file(dir, password, file)
                 main()
+            elif uc == 'q':
+                main()
             else:
                 print('wrong command')
-                main()
     elif user_comand == '2':
-        uc = input("use file as key? +y -n: ")
-        if uc == '-':
-            uc = input('1 pass or 2 pass: ')
-            if uc == '1':
-                dir = input('encrypted file: ')
+        print('Decrypt file')
+        while True:
+            uc = input("use file as key? +y -n: ")
+            if uc == '-':
                 while True:
+                    uc = input('1 pass or 2 pass: ')
+                    if uc == '1':
+                        while True:
+                            dir = input('encrypted file: ')
+                            if dir == 'q':
+                                main()
+                            x1 = os.path.isfile(dir)
+                            if not x1:
+                                print('файл не найден')
+                            if x1:
+                                break
+                        while True:
+                            password = getpass.getpass('введи пароль 1: ')
+                            if password == 'q':
+                                main()
+                            try:
+                                decrypt_1pass(dir, password)
+                            except:
+                                print('невепный пароль')
+                            else:
+                                break
+                        main()
+                    elif uc == '2':
+                        while True:
+                            dir = input('encrypted file: ')
+                            if dir == 'q':
+                                main()
+                            x1 = os.path.isfile(dir)
+                            if not x1:
+                                print('файл не найден')
+                            if x1:
+                                break 
+                        while True:
+                            password = getpass.getpass('введи пароль 1: ')
+                            if password == 'q':
+                                main()
+                            password2 = getpass.getpass('введи пароль 2: ')
+                            if password2 == 'q':
+                                main()
+                            try:
+                                decrypt_2pass(dir, password, password2)
+                            except:
+                                print('невепный пароль')
+                            else:
+                                break   
+                        main()  
+                    elif uc == 'q':
+                        main()
+                    else:
+                        print('wrong command')  
+            elif uc == 'q':
+                main()    
+            elif uc == '+':
+                # проверка введёного файла на сушествование
+                while True:
+                    dir = input('encrypted file: ')
+                    if dir == 'q':
+                        main()
                     x1 = os.path.isfile(dir)
                     if not x1:
-                        print('файл не найден')
-                        dir = input('encrypted file: ')
+                        print('нет файла')
                     if x1:
                         break
                 password = getpass.getpass('введи пароль 1: ')
+                if password == 'q':
+                    main()
+                # проверка введёного файла-ключа на сушествование
+                while True:
+                    file = input('file key: ')
+                    if file == 'q':
+                        main()
+                    x1 = os.path.isfile(file)
+                    if not x1:
+                        print('нет файла')
+                    if x1:
+                        break
                 while True:
                     try:
-                        decrypt_1pass(dir, password)
+                        decrypt_add_file(dir, password, file)
                     except:
-                        print('невепный пароль')
+                        print('неправильный пароль или ключ файл')
                         password = getpass.getpass('введи пароль 1: ')
+                        if password == 'q':
+                            main()
+                        # проверка введёного файла-ключа на сушествование
+                        while True:
+                            file = input('file key: ')
+                            if file == 'q':
+                                main()
+                            x1 = os.path.isfile(file)
+                            if not x1:
+                                print('нет файла')
+                            if x1:
+                                break                    
+                    else:
+                        break
+                main()
+            else:
+                print('wrong command')
+    elif user_comand == '3':
+        while True:
+            uc = input('1 pass or 2 pass: ')
+            if uc == 'q':
+                main()
+            elif uc == '1':
+                # проверка введёного файла на сушествование
+                while True:
+                    dir = input('dir: ')
+                    if dir == 'q':
+                        main()
+                    x1 = os.path.isdir(dir)
+                    if not x1:
+                        print('нет папки')
+                    if x1:
+                        break
+                while True:
+                    password_1 = getpass.getpass('введи пароль 1: ')
+                    if password_1 == 'q':
+                        main()
+                    password_2 = getpass.getpass('повтори пвроль 1: ')
+                    if password_2 == 'q':
+                        main()
+                    if str(password_1) == str(password_2):
+                        password = password_2
+                        break
+                    else:
+                        print('different password')
+                cpt = sum([len(files) for r, d, files in os.walk(dir)])
+                bar = IncrementalBar('Processing', max=cpt)
+                walk_e_1pass(dir, password)
+                bar.finish()
+                main()
+            elif uc == '2':
+                # проверка введёного файла на сушествование
+                while True:
+                    dir = input('dir: ')
+                    if dir == 'q':
+                        main()
+                    x1 = os.path.isdir(dir)
+                    if not x1:
+                        print('нет папки')
+                    if x1:
+                        break
+                while True:
+                    password_1 = getpass.getpass('введи пароль 1: ')
+                    if password_1 == 'q':
+                        main()
+                    password_2 = getpass.getpass('повтори пвроль 1: ')
+                    if password_2 == 'q':
+                        main()
+                    if str(password_1) == str(password_2):
+                        password = password_2
+                        break
+                    else:
+                        print('different password')
+                while True:
+                    password_3 = getpass.getpass('введи пароль 2: ')
+                    if password_3 == 'q':
+                        main()
+                    password_4 = getpass.getpass('повтори пвроль 2: ')
+                    if password_4 == 'q':
+                        main()
+                    if str(password_3) == str(password_4):
+                        password2 = password_3
+                        break
+                    else:
+                        print('different password')
+                cpt = sum([len(files) for r, d, files in os.walk(dir)])
+                bar = IncrementalBar('Processing', max=cpt)
+                walk_e_2pass(dir, password, password2)
+                bar.finish()
+                main()
+            else:
+                print('нет команды')
+    elif user_comand == '4':
+        while True:
+            uc = input('1 pass or 2 pass: ')
+            if uc == 'q':
+                main()
+            elif uc == '1':
+                # проверка введёного файла на сушествование
+                while True:
+                    dir = input('dir: ')
+                    if dir == 'q':
+                        main()
+                    x1 = os.path.isdir(dir)
+                    if not x1:
+                        print('нет папки')
+                    if x1:
+                        break
+                cpt = sum([len(files) for r, d, files in os.walk(dir)])
+                bar = IncrementalBar('Processing', max=cpt)
+                # проверка пароля
+                while True:
+                    password = getpass.getpass('введи пароль 1: ')
+                    try:
+                        walk_d_1pass(dir, password)
+                        bar.finish()
+                    except:
+                        print('неверный пароль ')
                     else:
                         break
                 main()
             elif uc == '2':
-                dir = input('encrypted file: ')
+                # проверка введёного файла на сушествование
                 while True:
-                    x1 = os.path.isfile(dir)
+                    dir = input('dir: ')
+                    if dir == 'q':
+                        main()
+                    x1 = os.path.isdir(dir)
                     if not x1:
-                        print('файл не найден')
-                        dir = input('encrypted file: ')
+                        print('нет папки')
                     if x1:
-                        break 
-                password = getpass.getpass('введи пароль 1: ')
-                password2 = getpass.getpass('введи пароль 2: ')
-                while True:
-                    try:
-                        decrypt_2pass(dir, password, password2)
-                    except:
-                        print('невепный пароль')
-                        password = getpass.getpass('введи пароль 1: ')
-                        password2 = getpass.getpass('введи пароль 2: ')
-                    else:
                         break
-                main()             
-        elif uc == '+':
-            dir = input('encrypted file: ')
-            # проверка введёного файла на сушествование
-            while True:
-                x1 = os.path.isfile(dir)
-                if not x1:
-                    print('нет файла')
-                    dir = input('encrypted file: ')
-                if x1:
-                    break
-            password = getpass.getpass('введи пароль 1: ')
-            file = input('file key: ')
-            # проверка введёного файла на сушествование
-            while True:
-                x1 = os.path.isfile(file)
-                if not x1:
-                    print('нет файла')
-                if x1:
-                    break
-            decrypt_add_file(dir, password, file)
-            main()
-        else:
-            print('wrong command')
-            main()
-    elif user_comand == '3':
-        uc = input('1 pass or 2 pass: ')
-        if uc == '1':
-            dir = input('dir: ')
-            # проверка введёного файла на сушествование
-            while True:
-                x1 = os.path.isdir(dir)
-                if not x1:
-                    print('нет папки')
-                    dir = input('dir: ')
-                if x1:
-                    break
-            password_1 = getpass.getpass('введи пароль 1: ')
-            password_2 = getpass.getpass('повтори пвроль 1: ')
-            if str(password_1) == str(password_2):
-                password = password_2
-            else:
-                print('different password')
-                main()
-            cpt = sum([len(files) for r, d, files in os.walk(dir)])
-            bar = IncrementalBar('Processing', max=cpt)
-            walk_e_1pass(dir, password)
-            bar.finish()
-            main()
-        elif uc == '2':
-            dir = input('dir: ')
-            # проверка введёного файла на сушествование
-            while True:
-                x1 = os.path.isdir(dir)
-                if not x1:
-                    print('нет папки')
-                    dir = input('dir: ')
-                if x1:
-                    break
-            password_1 = getpass.getpass('введи пароль 1: ')
-            password_2 = getpass.getpass('повтори пвроль 1: ')
-            if str(password_1) == str(password_2):
-                password = password_2
-            else:
-                print('different password')
-                main()
-            password_3 = getpass.getpass('введи пароль 2: ')
-            password_4 = getpass.getpass('повтори пвроль 2: ')
-            if str(password_3) == str(password_4):
-                password2 = password_3
-            else:
-                print('different password')
-                main()
-            cpt = sum([len(files) for r, d, files in os.walk(dir)])
-            bar = IncrementalBar('Processing', max=cpt)
-            walk_e_2pass(dir, password, password2)
-            bar.finish()
-            main()
-        else:
-            print('нет команды')
-            main()
-    elif user_comand == '4':
-        uc = input('1 pass or 2 pass: ')
-        if uc == '1':
-            dir = input('dir: ')
-            # проверка введёного файла на сушествование
-            while True:
-                x1 = os.path.isdir(dir)
-                if not x1:
-                    print('нет папки')
-                    dir = input('dir: ')
-                if x1:
-                    break
-            password = getpass.getpass('введи пароль 1: ')
-            cpt = sum([len(files) for r, d, files in os.walk(dir)])
-            bar = IncrementalBar('Processing', max=cpt)
-            # проверка пароля
-            while True:
-                try:
-                    walk_d_1pass(dir, password)
-                    bar.finish()
-                except:
-                    print('неверный пароль ')
-                    password = getpass.getpass('введи пароль 1: ')
-                else:
-                    break
-            main()
-        elif uc == '2':
-            dir = input('dir: ')
-            # проверка введёного файла на сушествование
-            while True:
-                x1 = os.path.isdir(dir)
-                if not x1:
-                    print('нет папки')
-                    dir = input('dir: ')
-                if x1:
-                    break
-            password = getpass.getpass('введи пароль 1: ')
-            password2 = getpass.getpass('введи пароль 2: ')
-            cpt = sum([len(files) for r, d, files in os.walk(dir)])
-            bar = IncrementalBar('Processing', max=cpt)
-            # проверка пароля
-            while True:
-                try:
-                    walk_d_2pass(dir, password, password2)
-                    bar.finish()
-                except:
-                    print('неверный пароль ')
+                cpt = sum([len(files) for r, d, files in os.walk(dir)])
+                bar = IncrementalBar('Processing', max=cpt)
+                # проверка пароля
+                while True:
                     password = getpass.getpass('введи пароль 1: ')
                     password2 = getpass.getpass('введи пароль 2: ')
-                else:
-                    break
-            main()            
-        else:
-            print('нет команды')
-            main()
+                    try:
+                        walk_d_2pass(dir, password, password2)
+                        bar.finish()
+                    except:
+                        print('неверный пароль ')
+                    else:
+                        break
+                main()            
+            else:
+                print('нет команды')
     elif user_comand == '5':
-        print('')
         sys.exit()
     else:
         print('not valibale action')
