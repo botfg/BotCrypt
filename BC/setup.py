@@ -10,7 +10,7 @@ setup(
     author='botfg76',
     author_email='botfgbartenevfgzero76@gmail.com',
     license='Apache License Version 2.0',
-    url='https://github.com/botfg/BotDr',
+    url='https://github.com/botfg/BotCrypt',
     description='crypt and decrypt file',
     long_description=open(join(dirname(__file__), 'README.rst')).read(),
     version=BotCrypt.__version__,
