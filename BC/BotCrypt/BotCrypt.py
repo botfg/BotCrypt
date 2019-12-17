@@ -1,5 +1,5 @@
 # ==============================================================================
-# Copyright 2019 Nikolai Bartenev. Contacts: botfgbartenevfgzero76@gmail.com
+# Copyright 2020 Nikolai Bartenev. Contacts: botfgbartenevfgzero76@gmail.com
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ class color:
     RED = ('\033[91m')
     END = ('\033[0m')
 
-botdrPrompt = (color.OKGREEN + "BotDr ~# " + color.END)
+botdrPrompt = (color.OKGREEN + "BotCrypt ~# " + color.END)
 
 
 
@@ -193,7 +193,7 @@ def main() -> None:
         print(botdrlogo)
         print(dec(color.RED + 'Encrypt file' + color.END))
         while True:
-            print(color.OKBLUE + 'use file as key? [Y/n]\n' + color.END)
+            print(color.OKBLUE + 'Use file as key? [Y/n]\n' + color.END)
             uc = input(botdrPrompt)
             if uc == 'Q':
                 main()
@@ -209,7 +209,7 @@ def main() -> None:
                     elif uc == '1':
                         clearScr()
                         print(botdrlogo)
-                        print(dec(color.RED + 'Encrypt file один пароль' + color.END))
+                        print(dec(color.RED + 'single password file encryption' + color.END))
                         # проверка введёного файла на сушествование
                         while True:
                             dir = input(color.OKBLUE + 'encrypted file: ' + color.END)
@@ -217,14 +217,14 @@ def main() -> None:
                                 main()
                             x1 = os.path.isfile(dir)
                             if not x1:
-                                print(color.RED + 'нет файла' + color.END)
+                                print(color.RED + 'file not found' + color.END)
                             if x1:
                                 break
                         while True:
-                            password_1 = getpass.getpass(color.OKBLUE + 'введи пароль 1: ' + color.END)
+                            password_1 = getpass.getpass(color.OKBLUE + 'enter password 1: ' + color.END)
                             if password_1 == 'Q':
                                 main()
-                            password_2 = getpass.getpass(color.OKBLUE + 'повтори пвроль 1: ' + color.END)
+                            password_2 = getpass.getpass(color.OKBLUE + 'repeat password 1: ' + color.END)
                             if password_2 == 'Q':
                                 main()
                             if str(password_1) == str(password_2):
@@ -237,7 +237,7 @@ def main() -> None:
                     elif uc == '2':
                         clearScr()
                         print(botdrlogo)
-                        print(dec(color.RED + 'Encrypt file 2 пароль' + color.END))
+                        print(dec(color.RED + 'file encryption with two passwords' + color.END))
                         # проверка введёного файла на сушествование
                         while True:
                             dir = input(color.OKBLUE + 'encrypted file: ' + color.END)
@@ -245,14 +245,14 @@ def main() -> None:
                                 main()
                             x1 = os.path.isfile(dir)
                             if not x1:
-                                print(color.RED + 'нет файла' + color.END)
+                                print(color.RED + 'file not found' + color.END)
                             if x1:
                                 break
                         while True: # проверка 1 пароля
-                            password_1 = getpass.getpass(color.OKBLUE + 'введи пароль 1: ' + color.END)
+                            password_1 = getpass.getpass(color.OKBLUE + 'enter password 1: ' + color.END)
                             if password_1 == 'Q':
                                 main()
-                            password_2 = getpass.getpass(color.OKBLUE + 'повтори пвроль 1: ' + color.END)
+                            password_2 = getpass.getpass(color.OKBLUE + 'repeat password 1: ' + color.END)
                             if password_2 == 'Q':
                                 main()
                             if str(password_1) == str(password_2):
@@ -261,10 +261,10 @@ def main() -> None:
                             else:
                                 print(color.RED + 'different password' + color.END)
                         while True: # проверка второго пароля
-                            password_3 = getpass.getpass(color.OKBLUE + 'введи пароль 2: ' + color.END)
+                            password_3 = getpass.getpass(color.OKBLUE + 'enter password 2: ' + color.END)
                             if password_3 == 'Q':
                                 main()
-                            password_4 = getpass.getpass(color.OKBLUE + 'повтори пвроль 2: ' + color.END)
+                            password_4 = getpass.getpass(color.OKBLUE + 'repeat password 2: ' + color.END)
                             if password_4 == 'Q':
                                 main()
                             if str(password_3) == str(password_4):
@@ -279,7 +279,7 @@ def main() -> None:
             elif uc == 'Y':
                 clearScr()
                 print(botdrlogo)
-                print(dec(color.RED + 'Encrypt file с файл ключём' + color.END))
+                print(dec(color.RED + 'file encryption with key_file' + color.END))
                 # проверка введёного файла на сушествование
                 while True:
                     dir = input(color.OKBLUE + 'encrypted file: ' + color.END)
@@ -287,11 +287,11 @@ def main() -> None:
                         main()
                     x1 = os.path.isfile(dir)
                     if not x1:
-                        print(color.RED + 'нет файла' + color.END)
+                        print(color.RED + 'file not found' + color.END)
                     elif x1:
                         break
-                password_1 = getpass.getpass(color.OKBLUE + 'введи пароль 1: ' + color.END)
-                password_2 = getpass.getpass(color.OKBLUE + 'повтори пвроль 1: ' + color.END)
+                password_1 = getpass.getpass(color.OKBLUE + 'enter password 1: ' + color.END)
+                password_2 = getpass.getpass(color.OKBLUE + 'repeat password 1: ' + color.END)
                 if str(password_1) == str(password_2):
                     password = str(password_2)
                 else:
@@ -304,7 +304,7 @@ def main() -> None:
                         main()
                     x1 = os.path.isfile(file)
                     if not x1:
-                        print(color.RED + 'нет файла' + color.END)
+                        print(color.RED + 'file not found' + color.END)
                     if x1:
                         break
                 crypt_add_file(dir, password, file)
@@ -330,51 +330,51 @@ def main() -> None:
                     if uc == '1':
                         clearScr()
                         print(botdrlogo)
-                        print(dec(color.RED + 'Decrypt file 1 pass' + color.END)) 
+                        print(dec(color.RED + 'decryption file with one password' + color.END)) 
                         while True:
                             dir = input(color.OKBLUE + 'encrypted file: ' + color.END)
                             if dir == 'Q':
                                 main()
                             x1 = os.path.isfile(dir)
                             if not x1:
-                                print(color.RED + 'файл не найден' + color.END)
+                                print(color.RED + 'file not found' + color.END)
                             if x1:
                                 break
                         while True:
-                            password = getpass.getpass(color.OKBLUE + 'введи пароль 1: ' + color.END)
+                            password = getpass.getpass(color.OKBLUE + 'enter password 1: ' + color.END)
                             if password == 'Q':
                                 main()
                             try:
                                 decrypt_1pass(dir, password)
                             except:
-                                print(color.RED + 'невепный пароль' + color.END)
+                                print(color.RED + 'Invalid password' + color.END)
                             else:
                                 break
                         main()
                     elif uc == '2':
                         clearScr()
                         print(botdrlogo)
-                        print(dec(color.RED + 'Decrypt file 2 pass' + color.END))
+                        print(dec(color.RED + 'decryption file with two passwords' + color.END))
                         while True:
                             dir = input(color.OKBLUE + 'encrypted file: ' + color.END)
                             if dir == 'Q':
                                 main()
                             x1 = os.path.isfile(dir)
                             if not x1:
-                                print(color.RED + 'файл не найден' + color.END)
+                                print(color.RED + 'file not found' + color.END)
                             if x1:
                                 break 
                         while True:
-                            password = getpass.getpass(color.OKBLUE + 'введи пароль 1: ' + color.END)
+                            password = getpass.getpass(color.OKBLUE + 'entr password 1: ' + color.END)
                             if password == 'Q':
                                 main()
-                            password2 = getpass.getpass(color.OKBLUE + 'введи пароль 2: ' + color.END)
+                            password2 = getpass.getpass(color.OKBLUE + 'enter password 2: ' + color.END)
                             if password2 == 'Q':
                                 main()
                             try:
                                 decrypt_2pass(dir, password, password2)
                             except:
-                                print(color.RED + 'невепный пароль' + color.END)
+                                print(color.RED + 'Invalid password' + color.END)
                             else:
                                 break   
                         main()  
@@ -387,7 +387,7 @@ def main() -> None:
             elif uc == 'Y':
                 clearScr()
                 print(botdrlogo)
-                print(dec(color.RED + 'Decrypt file с ключём файлом' + color.END))
+                print(dec(color.RED + 'decryption file with file_key' + color.END))
                 # проверка введёного файла на сушествование
                 while True:
                     dir = input(color.OKBLUE + 'encrypted file: ' + color.END)
@@ -395,10 +395,10 @@ def main() -> None:
                         main()
                     x1 = os.path.isfile(dir)
                     if not x1:
-                        print(color.RED + 'нет файла' + color.END)
+                        print(color.RED + 'file not found' + color.END)
                     if x1:
                         break
-                password = getpass.getpass(color.OKBLUE + 'введи пароль 1: ' + color.END)
+                password = getpass.getpass(color.OKBLUE + 'enter password 1: ' + color.END)
                 if password == 'Q':
                     main()
                 # проверка введёного файла-ключа на сушествование
@@ -408,15 +408,15 @@ def main() -> None:
                         main()
                     x1 = os.path.isfile(file)
                     if not x1:
-                        print(color.RED + 'нет файла' + color.END)
+                        print(color.RED + 'file not found' + color.END)
                     if x1:
                         break
                 while True:
                     try:
                         decrypt_add_file(dir, password, file)
                     except:
-                        print(color.RED + 'неправильный пароль или ключ файл' + color.END)
-                        password = getpass.getpass(color.OKBLUE + 'введи пароль 1: ' + color.END)
+                        print(color.RED + 'wrong password or file_key' + color.END)
+                        password = getpass.getpass(color.OKBLUE + 'enter password 1: ' + color.END)
                         if password == 'Q':
                             main()
                         # проверка введёного файла-ключа на сушествование
@@ -426,7 +426,7 @@ def main() -> None:
                                 main()
                             x1 = os.path.isfile(file)
                             if not x1:
-                                print(color.RED + 'нет файла' + color.END)
+                                print(color.RED + 'file not found' + color.END)
                             if x1:
                                 break                    
                     else:
@@ -446,7 +446,7 @@ def main() -> None:
             elif uc == '1':
                 clearScr()
                 print(botdrlogo)
-                print(dec(color.RED + 'Encrypt_dir 1 pass' + color.END))
+                print(dec(color.RED + 'one-password directory encryption' + color.END))
                 # проверка введёного файла на сушествование
                 while True:
                     dir = input(color.OKBLUE + 'dir: ' + color.END)
@@ -454,14 +454,14 @@ def main() -> None:
                         main()
                     x1 = os.path.isdir(dir)
                     if not x1:
-                        print(color.RED + 'нет папки' + color.END)
+                        print(color.RED + 'dir not found' + color.END)
                     if x1:
                         break
                 while True:
-                    password_1 = getpass.getpass(color.OKBLUE + 'введи пароль 1: ' + color.END)
+                    password_1 = getpass.getpass(color.OKBLUE + 'enter password 1: ' + color.END)
                     if password_1 == 'Q':
                         main()
-                    password_2 = getpass.getpass(color.OKBLUE + 'повтори пвроль 1: ' + color.END)
+                    password_2 = getpass.getpass(color.OKBLUE + 'repeat password 1: ' + color.END)
                     if password_2 == 'Q':
                         main()
                     if str(password_1) == str(password_2):
@@ -477,7 +477,7 @@ def main() -> None:
             elif uc == '2':
                 clearScr()
                 print(botdrlogo)
-                print(dec(color.RED + 'Encrypt_dir 2 pass' + color.END))
+                print(dec(color.RED + 'encryption directory with two passwords' + color.END))
                 # проверка введёного файла на сушествование
                 while True:
                     dir = input(color.OKBLUE + 'dir: ' + color.END)
@@ -485,14 +485,14 @@ def main() -> None:
                         main()
                     x1 = os.path.isdir(dir)
                     if not x1:
-                        print(color.RED + 'нет папки' + color.END)
+                        print(color.RED + 'dir not found' + color.END)
                     if x1:
                         break
                 while True:
-                    password_1 = getpass.getpass(color.OKBLUE + 'введи пароль 1: ' + color.END)
+                    password_1 = getpass.getpass(color.OKBLUE + 'enter password 1: ' + color.END)
                     if password_1 == 'Q':
                         main()
-                    password_2 = getpass.getpass(color.OKBLUE + 'повтори пвроль 1: ' + color.END)
+                    password_2 = getpass.getpass(color.OKBLUE + 'repeat password 1: ' + color.END)
                     if password_2 == 'Q':
                         main()
                     if str(password_1) == str(password_2):
@@ -501,10 +501,10 @@ def main() -> None:
                     else:
                         print(color.RED + 'different password' + color.END)
                 while True:
-                    password_3 = getpass.getpass(color.OKBLUE + 'введи пароль 2: ' + color.END)
+                    password_3 = getpass.getpass(color.OKBLUE + 'enter password 2: ' + color.END)
                     if password_3 == 'Q':
                         main()
-                    password_4 = getpass.getpass(color.OKBLUE + 'повтори пвроль 2: ' + color.END)
+                    password_4 = getpass.getpass(color.OKBLUE + 'repeate password 2: ' + color.END)
                     if password_4 == 'Q':
                         main()
                     if str(password_3) == str(password_4):
@@ -531,7 +531,7 @@ def main() -> None:
             elif uc == '1':
                 clearScr()
                 print(botdrlogo)
-                print(dec(color.RED + 'Decrypt_dir 1 pass' + color.END))
+                print(dec(color.RED + 'decryption directory with one password' + color.END))
                 # проверка введёного файла на сушествование
                 while True:
                     dir = input(color.OKBLUE + 'dir: ' + color.END)
@@ -539,26 +539,26 @@ def main() -> None:
                         main()
                     x1 = os.path.isdir(dir)
                     if not x1:
-                        print(color.RED + 'нет папки' + color.END)
+                        print(color.RED + 'dir not found' + color.END)
                     if x1:
                         break
                 cpt = sum([len(files) for r, d, files in os.walk(dir)])
                 bar = IncrementalBar('Processing', max=cpt)
                 # проверка пароля
                 while True:
-                    password = getpass.getpass(color.OKBLUE + 'введи пароль 1: ' + color.END)
+                    password = getpass.getpass(color.OKBLUE + 'enter password 1: ' + color.END)
                     try:
                         walk_d_1pass(dir, password)
                         bar.finish()
                     except:
-                        print(color.RED + 'неверный пароль ' + color.END)
+                        print(color.RED + 'invalid password' + color.END)
                     else:
                         break
                 main()
             elif uc == '2':
                 clearScr()
                 print(botdrlogo)
-                print(dec(color.RED + 'Decrypt_dir 2 pass' + color.END))
+                print(dec(color.RED + 'decryption directory with two passwords' + color.END))
                 # проверка введёного файла на сушествование
                 while True:
                     dir = input(color.OKBLUE + 'dir: ' + color.END)
@@ -566,24 +566,24 @@ def main() -> None:
                         main()
                     x1 = os.path.isdir(dir)
                     if not x1:
-                        print(color.RED + 'нет папки' + color.END)
+                        print(color.RED + 'dir not found' + color.END)
                     if x1:
                         break
                 cpt = sum([len(files) for r, d, files in os.walk(dir)])
                 bar = IncrementalBar('Processing', max=cpt)
                 # проверка пароля
                 while True:
-                    password = getpass.getpass(color.OKBLUE + 'введи пароль 1: ' + color.END)
+                    password = getpass.getpass(color.OKBLUE + 'enter password 1: ' + color.END)
                     if password == 'Q':
                         main()
-                    password2 = getpass.getpass(color.OKBLUE + 'введи пароль 2: ' + color.END)
+                    password2 = getpass.getpass(color.OKBLUE + 'enter password 2: ' + color.END)
                     if password2 == 'Q':
                         main()
                     try:
                         walk_d_2pass(dir, password, password2)
                         bar.finish()
                     except:
-                        print(color.RED + 'неверный пароль ' + color.END)
+                        print(color.RED + 'invalid password' + color.END)
                     else:
                         break
                 main()            
