@@ -1,2 +1,2 @@
 # BotCrypt
-CLI AES 256bit crypt
+AES 256bit crypt
