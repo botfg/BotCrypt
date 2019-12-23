@@ -19,7 +19,11 @@ import os
 import os.path
 import sys
 from hashlib import sha3_512
+import binascii
+import random
 
+
+import pyDes
 import pyAesCrypt
 from progress.bar import IncrementalBar
 
@@ -186,7 +190,10 @@ def main() -> None:
     print(color.RED + '2' + color.END + ')--' + color.OKBLUE + 'Decrypt_file' + color.END)
     print(color.RED + '3' + color.END + ')--' + color.OKBLUE + 'Encrypt_dir' + color.END)
     print(color.RED + '4' + color.END + ')--' + color.OKBLUE + 'Decrypt_dir' + color.END)
-    print(color.RED + '5' + color.END + ')--' + color.OKBLUE + 'Exit\n' + color.END)
+    print(color.RED + '5' + color.END + ')--' + color.OKBLUE + 'Encrypt_text' + color.END)
+    print(color.RED + '6' + color.END + ')--' + color.OKBLUE + 'Decrypt_text' + color.END)
+    print(color.RED + '7' + color.END + ')--' + color.OKBLUE + 'Password_generator' + color.END)
+    print(color.RED + '8' + color.END + ')--' + color.OKBLUE + 'Exit\n' + color.END)
     user_comand = input(botdrPrompt)
     if user_comand == '1':
         clearScr()
@@ -590,6 +597,102 @@ def main() -> None:
             else:
                 main()
     elif user_comand == '5':
+        clearScr()
+        print(botdrlogo)
+        print(dec(color.RED + 'Encrypt_text' + color.END))
+        data = input(color.OKBLUE + 'text: ' + color.END)
+        if data == 'Q':
+            main()
+        data = data.encode()
+        while True:
+            key = input(color.OKBLUE + 'enter 24 character password: ' + color.END)
+            if key == 'Q':
+                main()
+            key = key.encode()
+            if len(key) != 24:
+                print(color.RED + 'not 24 characters' + color.END)
+            elif len(key) == 24:
+                break
+        k = pyDes.triple_des(key, pyDes.CBC, b"\0\0\0\0\0\0\0\0", pad=None, padmode=pyDes.PAD_PKCS5)
+        d = k.encrypt(data).hex()
+        print (color.OKBLUE + "Encrypted: " + color.END + str(d))
+        while True:
+            print(color.RED + '\nQ)--GO BACK\n' + color.END)
+            uc = input(botdrPrompt)
+            if uc == 'Q':
+                main()
+    elif user_comand == '6':
+        clearScr()
+        print(botdrlogo)
+        print(dec(color.RED + 'Decrypt_text' + color.END))
+        while True:
+            try:
+                text = input(color.OKBLUE + 'text: ' + color.END)
+                if text == 'Q':
+                    main()
+                data = binascii.unhexlify(text)
+            except:
+                print(color.RED + 'invalid input' + color.END)
+                continue
+            else:
+                break
+        while True:
+            key = input(color.OKBLUE + 'enter 24 character password: ' + color.END)
+            if key == 'Q':
+                main()
+            key = key.encode()
+            if len(key) != 24:
+                print(color.RED + 'not 24 characters' + color.END)
+            elif len(key) == 24:
+                break
+        k = pyDes.triple_des(key, pyDes.CBC, b"\0\0\0\0\0\0\0\0", pad=None, padmode=pyDes.PAD_PKCS5)
+        out_text = str(k.decrypt(data).decode('utf-8'))
+        if len(out_text) == 0:
+            print(color.RED + 'invalid password' + color.END)
+        else:
+            print (color.OKBLUE + "Decrypted: " + color.END + out_text)
+        while True:
+            print(color.RED + '\nQ)--GO BACK\n' + color.END)
+            uc = input(botdrPrompt)
+            if uc == 'Q':
+                main()   
+    elif user_comand == '7':
+        clearScr()
+        print(botdrlogo)
+        print(dec(color.RED + 'Password generator' + color.END))
+        while True:
+            len_pass = input(color.OKBLUE + 'len password: ' + color.END)
+            if len_pass == 'Q':
+                main()
+            x1 = (len_pass).isnumeric()
+            if x1:
+                if int(len_pass) >= 1:
+                    break
+            if not x1:
+                print(color.RED + 'invalid input' + color.END)
+        while True:
+            num_pass = input(color.OKBLUE + 'Number of passwords: ' + color.END)
+            if num_pass == 'Q':
+                main()
+            x1 = (num_pass).isnumeric()
+            if x1:
+                if int(num_pass) >= 1:
+                    break
+            if not x1:
+                print(color.RED + 'invalid input' + color.END)
+        chars = ('+-/*!&$#?=@<>abcdefghijklnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890')
+        print('')
+        for n in range(int(num_pass)):
+            password = ('')
+            for i in range(int(len_pass)):
+                password += random.choice(chars)
+            print(password + '\n')
+        while True:
+            print(color.RED + 'Q)--GO BACK\n' + color.END)
+            uc = input(botdrPrompt)
+            if uc == 'Q':
+                main()
+    elif user_comand == '8':
         clearScr()
         sys.exit()
     else:
