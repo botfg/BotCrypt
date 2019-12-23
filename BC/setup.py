@@ -17,6 +17,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         'progress==1.5',
+        'pyDes==2.0.1',
         'pyAesCrypt==0.4.3'],
     entry_points={
         'console_scripts':
@@ -25,6 +26,14 @@ setup(
     zip_safe=False,
     include_package_data=True,
     python_requires='>=3.6',
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Programming Language :: Python :: 3 :: Only",
+        "Environment :: Console",
+        "License :: OSI Approved :: Apache Software License",
+        "Operating System :: Unix",
+        "Topic :: Security :: Cryptography",
+    ],
     
     
 )
