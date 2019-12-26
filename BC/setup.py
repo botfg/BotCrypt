@@ -2,7 +2,6 @@ from setuptools import setup, find_packages
 from os.path import join, dirname
 import os
 import BotCrypt
-from BotCrypt.BotCrypt import super_main
 
 
 setup(
@@ -17,11 +16,12 @@ setup(
     packages=find_packages(),
     install_requires=[
         'progress==1.5',
-        'pyDes==2.0.1',
-        'pyAesCrypt==0.4.3'],
+        'Stegano==0.9.7',
+        'pyAesCrypt==0.4.3',
+        'pyDes==2.0.1'],
     entry_points={
         'console_scripts':
-            ['bc = BotCrypt.BotCrypt:super_main']
+            ['bc = BotCrypt.main:main']
         },
     zip_safe=False,
     include_package_data=True,
