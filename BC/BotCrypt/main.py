@@ -13,20 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+import binascii
 import getpass
 import hashlib
 import os
 import os.path
+import random
 import sys
 from hashlib import sha3_512
-import binascii
-import random
 
-
-from stegano import lsb
-import pyDes
 import pyAesCrypt
+import pyDes
 from progress.bar import IncrementalBar
+from stegano import lsb
 
 
 class color:
@@ -36,8 +35,8 @@ class color:
     RED = ('\033[91m')
     END = ('\033[0m')
 
-botdrPrompt = (color.OKGREEN + "BotCrypt ~# " + color.END)
 
+botdrPrompt = (color.OKGREEN + "BotCrypt ~# " + color.END)
 
 
 botdrlogo = (color.OKGREEN + '''
@@ -47,141 +46,148 @@ botdrlogo = (color.OKGREEN + '''
  / /_/ / /_/ / /_   / /__/ /  / /_/ / /_/ / /_  
 /_____/\____/\__/   \___/_/   \__, / .___/\__/  
                              /____/_/
-''' + color.END)  
+''' + color.END)
 
 
 def dec(string: str) -> str:
-    length_string = (59 - len(string)) // 2     # 49
+    length_string = (59 - len(string)) // 2  # 49
     decor = str((length_string * '-') + string + (length_string * '-') + '\n')
-    return decor         
+    return decor
 
 
 def clearScr() -> None:
     os.system('clear')
 
 
-def hash(string) -> str:
+def hash(string: str) -> str:
     signature = sha3_512(string.encode()).hexdigest()
     return signature
 
 
-def sha1OfFile(filepath) -> str:
+def sha1OfFile(filepath: str) -> str:
     sha = hashlib.sha3_512()
     with open(filepath, 'rb') as f:
         while True:
-            block = f.read(2**10)
+            block = f.read(2 ** 10)
             if not block:
                 break
             sha.update(block)
         return sha.hexdigest()
 
 
-def crypt_2pass(file, password, password2) -> None:
-    buffer_size1 = 512 * 2048
-    file2 = file + '.bin'
-    pyAesCrypt.encryptFile(file, file2, password, buffer_size1)
-    buffer_size2 = 512 * 2048
-    pyAesCrypt.encryptFile(file2, str(file + '.aes'), password2, buffer_size2)
-    os.remove(file)
-    os.remove(file2)
-
-def crypt_1pass(file, password) -> None:
-    buffer_size1 = 512 * 2048
-    pyAesCrypt.encryptFile(file, str(file + '.aes'), password, buffer_size1)
-    os.remove(file)
-
-
-def crypt_add_file(file, password, fileKey) -> None:
-    buffer_size1 = 512 * 2048
-    pyAesCrypt.encryptFile(file, str(file + '.bin'), password, buffer_size1)
-    file2 = file + '.bin'
-    buffer_size2 = 512 * 2048
-    with open(fileKey, "rb") as in_file:
-        in_file.seek(0)
-        if len(in_file.read()) > 315:
-            file_b = str(in_file.read(315)) + str(sha1OfFile(fileKey))
-        elif len(in_file.read()) < 315:
-            file_b = str(in_file.read()) + str(sha1OfFile(fileKey))
-    pyAesCrypt.encryptFile(file2, str(file + '.aes'), file_b, buffer_size2)
-    os.remove(file)
-    os.remove(file2)
-
-
-def walk_e_1pass(dir, password) -> None:
-    for name in os.listdir(dir):
-        path = os.path.join(dir, name)
-        if os.path.isfile(path):
-            crypt_1pass(path, password)
-            bar.next()
-        else:
-            walk_e_1pass(path, password)
-
-
-def walk_d_1pass(dir, password) -> None:
-    for name in os.listdir(dir):
-        path = os.path.join(dir, name)
-        if os.path.isfile(path):
-            try:
-                decrypt_1pass(path, password)
-                bar.next()
-            except:
-                pass
-        else:
-            walk_d_1pass(path, password)
-
-
-def walk_e_2pass(dir, password, password2) -> None:
-    for name in os.listdir(dir):
-        path = os.path.join(dir,name)
-        if os.path.isfile(path):
-            crypt_2pass(path, password, password2)
-            bar.next()
-        else: 
-            walk_e_2pass(path, password, password2)
-
-
-def walk_d_2pass(dir, password, password2) -> None:
-    for name in os.listdir(dir):
-        path = os.path.join(dir, name)
-        if os.path.isfile(path):  
-            try: 
-                decrypt_2pass(path, password, password2)
-                bar.next()
-            except: pass
-        else: walk_d_2pass(path, password, password2)
-
-
-def decrypt_1pass(file, password) -> None:
-    buffer_size1 = 512 * 2048
-    file2 = file[0:-4] + '.bin'
-    pyAesCrypt.decryptFile(file, str(file2[:-4]), password, buffer_size1)
-    os.remove(file)
-
-
-def decrypt_2pass(file, password, password2) -> None:
+# args: 1)file path 2)password 3)password2 or file key path
+# mods: 1pas; 2pas; fkey
+def crypt_aes(*args: str, mod: str) -> None:
     buffer_size = 512 * 2048
-    file2 = file[:-4] + '.bin'
-    pyAesCrypt.decryptFile(file, file2, password2, buffer_size)
-    pyAesCrypt.decryptFile(file2, str(file[:-4]), password, buffer_size)
-    os.remove(file)
-    os.remove(file2)
+    file2 = args[0][:-4] + '.bin'
+    file = args[0]
+    password = args[1]
+    if mod == '1pas':
+        pyAesCrypt.encryptFile(file, str(file + '.aes'), password, buffer_size)
+        os.remove(file)
+    elif mod == '2pas':
+        password2 = args[2]
+        pyAesCrypt.encryptFile(file, file2, password, buffer_size)
+        buffer_size2 = 512 * 2048
+        pyAesCrypt.encryptFile(file2, str(file + '.aes'), password2, buffer_size)
+        os.remove(file)
+        os.remove(file2)
+    elif mod == 'fkey':
+        fileKey = args[2]
+        pyAesCrypt.encryptFile(file, str(file + '.bin'), password, buffer_size)
+        with open(fileKey, "rb") as in_file:
+            in_file.seek(0)
+            if len(in_file.read()) > 315:
+                file_b = str(in_file.read(315)) + str(sha1OfFile(fileKey))
+            elif len(in_file.read()) < 315:
+                file_b = str(in_file.read()) + str(sha1OfFile(fileKey))
+        in_file.close()
+        pyAesCrypt.encryptFile(file2, str(file + '.aes'), file_b, buffer_size)
+        os.remove(file)
+        os.remove(file2)
 
 
-def decrypt_add_file(file, password, fileKey) -> None:
+# args: 1)dir path: str 2)password: str  optional: 3)password2: str
+def walk_e_pass(*args: str) -> None:
+    dir = args[0]
+    password = args[1]
+    if len(args) == 2:
+        for name in os.listdir(dir):
+            path = os.path.join(dir, name)
+            if os.path.isfile(path):
+                crypt_aes(path, password, mod='1pas')
+                bar.next()
+            else:
+                walk_e_pass(path, password)
+    elif len(args) == 3:
+        password2 = args[2]
+        for name in os.listdir(dir):
+            path = os.path.join(dir, name)
+            if os.path.isfile(path):
+                crypt_aes(path, password, password2, mod='2pas')
+                bar.next()
+            else:
+                walk_e_pass(path, password, password2)
+
+
+# args: 1)dir path: str 2)password: str  optional: 3)password2: str
+def walk_d_pass(*args: str) -> None:
+    dir = args[0]
+    password = args[1]
+    if len(args) == 2:
+        for name in os.listdir(dir):
+            path = os.path.join(dir, name)
+            if os.path.isfile(path):
+                try:
+                    decrypt_aes(path, password, mod='1pas')
+                    bar.next()
+                except:
+                    pass
+            else:
+                walk_d_pass(path, password)
+    elif len(args) == 3:
+        password2 = args[2]
+        for name in os.listdir(dir):
+            path = os.path.join(dir, name)
+            if os.path.isfile(path):
+                try:
+                    decrypt_aes(path, password, password2, mod='2pas')
+                    bar.next()
+                except:
+                    pass
+            else:
+                walk_d_pass(path, password, password2)
+
+
+# args: 1)file path 2)password 3)password2 or file key path
+# mods: 1pas; 2pas; fkey
+def decrypt_aes(*args: str, mod: str) -> None:
     buffer_size = 512 * 2048
-    file2 = file[0:-4] + '.bin'
-    with open(fileKey, "rb") as in_file:
-        in_file.seek(0)
-        if len(in_file.read()) > 315:
-            file_b = str(in_file.read(315)) + str(sha1OfFile(fileKey))
-        elif len(in_file.read()) < 315:
-            file_b = str(in_file.read()) + str(sha1OfFile(fileKey))
-    pyAesCrypt.decryptFile(file, file2, file_b, buffer_size)
-    os.remove(file)
-    pyAesCrypt.decryptFile(file2, str(file[0:-4]), password, buffer_size)
-    os.remove(file2)
-
-
+    file2 = args[0][:-4] + '.bin'
+    file = args[0]
+    password = args[1]
+    if mod == '1pas':
+        pyAesCrypt.decryptFile(file, str(file2[:-4]), password, buffer_size)
+        os.remove(file)
+    elif mod == '2pas':
+        password2 = args[2]
+        pyAesCrypt.decryptFile(file, file2, password2, buffer_size)
+        pyAesCrypt.decryptFile(file2, str(file[:-4]), password, buffer_size)
+        os.remove(file)
+        os.remove(file2)
+    elif mod == 'fkey':
+        fileKey = args[2]
+        with open(fileKey, "rb") as in_file:
+            in_file.seek(0)
+            if len(in_file.read()) > 315:
+                file_b = str(in_file.read(315)) + str(sha1OfFile(fileKey))
+            elif len(in_file.read()) < 315:
+                file_b = str(in_file.read()) + str(sha1OfFile(fileKey))
+        in_file.close()
+        pyAesCrypt.decryptFile(file, file2, file_b, buffer_size)
+        os.remove(file)
+        pyAesCrypt.decryptFile(file2, str(file[0:-4]), password, buffer_size)
+        os.remove(file2)
 
 
 def commands_Encrypt_file() -> None:
@@ -228,7 +234,7 @@ def commands_Encrypt_file() -> None:
                             break
                         else:
                             print(color.RED + 'different password' + color.END)
-                    crypt_1pass(dir, password)
+                    crypt_aes(dir, password, mod='1pas')
                     main()
                 elif uc == '2':
                     clearScr()
@@ -244,7 +250,7 @@ def commands_Encrypt_file() -> None:
                             print(color.RED + 'file not found' + color.END)
                         if x1:
                             break
-                    while True: # проверка 1 пароля
+                    while True:  # проверка 1 пароля
                         password_1 = getpass.getpass(color.OKBLUE + 'enter password 1: ' + color.END)
                         if password_1 == 'Q':
                             main()
@@ -256,7 +262,7 @@ def commands_Encrypt_file() -> None:
                             break
                         else:
                             print(color.RED + 'different password' + color.END)
-                    while True: # проверка второго пароля
+                    while True:  # проверка второго пароля
                         password_3 = getpass.getpass(color.OKBLUE + 'enter password 2: ' + color.END)
                         if password_3 == 'Q':
                             main()
@@ -268,7 +274,7 @@ def commands_Encrypt_file() -> None:
                             break
                         else:
                             print(color.RED + 'different password' + color.END)
-                    crypt_2pass(dir, password, password2)
+                    crypt_aes(dir, password, password2, mod='2pas')
                     main()
                 else:
                     print('wrong command')
@@ -303,7 +309,7 @@ def commands_Encrypt_file() -> None:
                     print(color.RED + 'file not found' + color.END)
                 if x1:
                     break
-            crypt_add_file(dir, password, file)
+            crypt_aes(dir, password, file, mod='fkey')
             main()
         else:
             main()
@@ -326,7 +332,7 @@ def commands_Decrypt_file() -> None:
                 if uc == '1':
                     clearScr()
                     print(botdrlogo)
-                    print(dec(color.RED + 'decryption file with one password' + color.END)) 
+                    print(dec(color.RED + 'decryption file with one password' + color.END))
                     while True:
                         dir = input(color.OKBLUE + 'encrypted file: ' + color.END)
                         if dir == 'Q':
@@ -341,7 +347,7 @@ def commands_Decrypt_file() -> None:
                         if password == 'Q':
                             main()
                         try:
-                            decrypt_1pass(dir, password)
+                            decrypt_aes(dir, password, mod='1pas')
                         except:
                             print(color.RED + 'Invalid password' + color.END)
                         else:
@@ -359,7 +365,7 @@ def commands_Decrypt_file() -> None:
                         if not x1:
                             print(color.RED + 'file not found' + color.END)
                         if x1:
-                            break 
+                            break
                     while True:
                         password = getpass.getpass(color.OKBLUE + 'entr password 1: ' + color.END)
                         if password == 'Q':
@@ -368,18 +374,18 @@ def commands_Decrypt_file() -> None:
                         if password2 == 'Q':
                             main()
                         try:
-                            decrypt_2pass(dir, password, password2)
+                            decrypt_aes(dir, password, password2, mod='2pas')
                         except:
                             print(color.RED + 'Invalid password' + color.END)
                         else:
-                            break   
-                    main()  
+                            break
+                    main()
                 elif uc == 'Q':
                     main()
                 else:
-                    main()  
+                    main()
         elif uc == 'Q':
-            main()    
+            main()
         elif uc == 'Y':
             clearScr()
             print(botdrlogo)
@@ -409,7 +415,7 @@ def commands_Decrypt_file() -> None:
                     break
             while True:
                 try:
-                    decrypt_add_file(dir, password, file)
+                    decrypt_aes(dir, password, file, mod='fkey')
                 except:
                     print(color.RED + 'wrong password or file_key' + color.END)
                     password = getpass.getpass(color.OKBLUE + 'enter password 1: ' + color.END)
@@ -424,14 +430,14 @@ def commands_Decrypt_file() -> None:
                         if not x1:
                             print(color.RED + 'file not found' + color.END)
                         if x1:
-                            break                    
+                            break
                 else:
                     break
             main()
         else:
             main()
-            
-            
+
+
 def commands_Encrypt_dir() -> None:
     global bar
     clearScr()
@@ -470,7 +476,7 @@ def commands_Encrypt_dir() -> None:
                     print(color.RED + 'different password' + color.END)
             cpt = sum([len(files) for r, d, files in os.walk(dir)])
             bar = IncrementalBar('Processing', max=cpt)
-            walk_e_1pass(dir, password)
+            walk_e_pass(dir, password)
             bar.finish()
             main()
         elif uc == '2':
@@ -513,11 +519,11 @@ def commands_Encrypt_dir() -> None:
                     print(color.RED + 'different password' + color.END)
             cpt = sum([len(files) for r, d, files in os.walk(dir)])
             bar = IncrementalBar('Processing', max=cpt)
-            walk_e_2pass(dir, password, password2)
+            walk_e_pass(dir, password, password2)
             bar.finish()
             main()
         else:
-            main()    
+            main()
 
 
 def commands_Decrypt_dir() -> None:
@@ -550,7 +556,7 @@ def commands_Decrypt_dir() -> None:
                 try:
                     cpt = sum([len(files) for r, d, files in os.walk(dir)])
                     bar = IncrementalBar('Processing', max=cpt)
-                    walk_d_1pass(dir, password)
+                    walk_d_pass(dir, password)
                     bar.finish()
                 except:
                     print(color.RED + 'invalid password' + color.END)
@@ -582,13 +588,13 @@ def commands_Decrypt_dir() -> None:
                 try:
                     cpt = sum([len(files) for r, d, files in os.walk(dir)])
                     bar = IncrementalBar('Processing', max=cpt)
-                    walk_d_2pass(dir, password, password2)
+                    walk_d_pass(dir, password, password2)
                     bar.finish()
                 except:
                     print(color.RED + 'invalid password' + color.END)
                 else:
                     break
-            main()            
+            main()
         else:
             main()
 
@@ -612,13 +618,14 @@ def commands_Encrypt_text() -> None:
             break
     k = pyDes.triple_des(key, pyDes.CBC, b"\0\0\0\0\0\0\0\0", pad=None, padmode=pyDes.PAD_PKCS5)
     d = k.encrypt(data).hex()
-    print (color.OKBLUE + "Encrypted: " + color.END + str(d))
+    print(color.OKBLUE + "Encrypted: " + color.END + str(d))
     while True:
         print(color.RED + '\nQ)--GO BACK\n' + color.END)
         uc = input(botdrPrompt)
         if uc == 'Q':
             main()
-            
+
+
 def commands_Decrypt_text() -> None:
     clearScr()
     print(botdrlogo)
@@ -648,12 +655,12 @@ def commands_Decrypt_text() -> None:
     if len(out_text) == 0:
         print(color.RED + 'invalid password' + color.END)
     else:
-        print (color.OKBLUE + "Decrypted: " + color.END + out_text)
+        print(color.OKBLUE + "Decrypted: " + color.END + out_text)
     while True:
         print(color.RED + '\nQ)--GO BACK\n' + color.END)
         uc = input(botdrPrompt)
         if uc == 'Q':
-            main()   
+            main()
 
 
 def commands_Password_generator() -> None:
@@ -691,9 +698,9 @@ def commands_Password_generator() -> None:
         print(color.RED + 'Q)--GO BACK\n' + color.END)
         uc = input(botdrPrompt)
         if uc == 'Q':
-            main()  
-            
-            
+            main()
+
+
 def commands_Encrypt_img() -> None:
     clearScr()
     print(botdrlogo)
@@ -724,7 +731,7 @@ def commands_Encrypt_img() -> None:
                 img = input(color.OKBLUE + 'picture for text injection: ' + color.END)
                 if img == 'Q':
                     main()
-                x1 = os.path.isfile(img)    
+                x1 = os.path.isfile(img)
                 if x1:
                     filename, file_extension = os.path.splitext(img)
                     if file_extension == 'png' or 'PNG':
@@ -741,7 +748,7 @@ def commands_Encrypt_img() -> None:
         elif uc == 'n':
             clearScr()
             print(botdrlogo)
-            print(dec(color.RED + 'PNG hide' + color.END)) 
+            print(dec(color.RED + 'PNG hide' + color.END))
             data = input(color.OKBLUE + 'text: ' + color.END)
             if data == 'Q':
                 main()
@@ -749,7 +756,7 @@ def commands_Encrypt_img() -> None:
                 img = input(color.OKBLUE + 'picture for text injection: ' + color.END)
                 if img == 'Q':
                     main()
-                x1 = os.path.isfile(img)    
+                x1 = os.path.isfile(img)
                 if x1:
                     filename, file_extension = os.path.splitext(img)
                     if file_extension == 'png' or 'PNG':
@@ -782,7 +789,7 @@ def commands_Decrypt_img() -> None:
                 img = input(color.OKBLUE + 'picture: ' + color.END)
                 if img == 'Q':
                     main()
-                x1 = os.path.isfile(img)    
+                x1 = os.path.isfile(img)
                 if x1:
                     filename, file_extension = os.path.splitext(img)
                     if file_extension == 'png' or 'PNG':
@@ -791,7 +798,7 @@ def commands_Decrypt_img() -> None:
                         print(color.RED + 'not png file' + color.END)
                         continue
                 if not x1:
-                    print(color.RED + 'file not found' + color.END)   
+                    print(color.RED + 'file not found' + color.END)
             des_message = lsb.reveal(img)
             data = binascii.unhexlify(des_message)
             while True:
@@ -808,7 +815,7 @@ def commands_Decrypt_img() -> None:
             if len(out_text) == 0:
                 print(color.RED + 'invalid password' + color.END)
             else:
-                print (color.OKBLUE + "Decrypted text: " + color.END + out_text)
+                print(color.OKBLUE + "Decrypted text: " + color.END + out_text)
             while True:
                 print(color.RED + '\nQ)--GO BACK\n' + color.END)
                 uc = input(botdrPrompt)
@@ -822,7 +829,7 @@ def commands_Decrypt_img() -> None:
                 img = input(color.OKBLUE + 'picture: ' + color.END)
                 if img == 'Q':
                     main()
-                x1 = os.path.isfile(img)    
+                x1 = os.path.isfile(img)
                 if x1:
                     filename, file_extension = os.path.splitext(img)
                     if file_extension == 'png' or 'PNG':
@@ -831,7 +838,7 @@ def commands_Decrypt_img() -> None:
                         print(color.RED + 'not png file' + color.END)
                         continue
                 if not x1:
-                    print(color.RED + 'file not found' + color.END)   
+                    print(color.RED + 'file not found' + color.END)
             clear_message = lsb.reveal(img)
             print(color.OKBLUE + 'text: ' + color.END + clear_message)
             while True:
@@ -853,8 +860,8 @@ def main() -> None:
     print(color.RED + '4' + color.END + ')--' + color.OKBLUE + 'PNG' + color.END)
     print(color.RED + '5' + color.END + ')--' + color.OKBLUE + 'Password_generator' + color.END)
     print(color.RED + '6' + color.END + ')--' + color.OKBLUE + 'Exit\n' + color.END)
-    user_comand = input(botdrPrompt)
-    if user_comand == '1':
+    user_command = input(botdrPrompt)
+    if user_command == '1':
         clearScr()
         print(botdrlogo)
         print(dec(color.RED + 'File' + color.END))
@@ -872,7 +879,7 @@ def main() -> None:
                 main()
                 break
         main()
-    elif user_comand == '2':
+    elif user_command == '2':
         clearScr()
         print(botdrlogo)
         print(dec(color.RED + 'Dir' + color.END))
@@ -889,8 +896,8 @@ def main() -> None:
             elif uc == 'Q':
                 main()
                 break
-        main()  
-    elif user_comand == '3':
+        main()
+    elif user_command == '3':
         clearScr()
         print(botdrlogo)
         print(dec(color.RED + 'Text' + color.END))
@@ -908,7 +915,7 @@ def main() -> None:
                 main()
                 break
         main()
-    elif user_comand == '4':
+    elif user_command == '4':
         clearScr()
         print(botdrlogo)
         print(dec(color.RED + 'Img' + color.END))
@@ -926,11 +933,14 @@ def main() -> None:
                 main()
                 break
         main()
-    elif user_comand == '5':
+    elif user_command == '5':
         commands_Password_generator()
         main()
-    elif user_comand == '6':
+    elif user_command == '6':
         clearScr()
         sys.exit()
     else:
         main()
+
+
+main()
