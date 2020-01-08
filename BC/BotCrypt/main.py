@@ -941,6 +941,3 @@ def main() -> None:
         sys.exit()
     else:
         main()
-
-
-main()
